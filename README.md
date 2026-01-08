@@ -1,1 +1,7 @@
 To compile this to `.dll` u need to install [detours](https://github.com/microsoft/Detours) lib first, i.e. build it 'till u get `detours.lib` file and specify destination `.lib` path in additional directories of Visual Studio project settings as well as include this `.lib` file to additional dependencies in mentioned Visual Studio project settings.
+
+[deps](/readme-resources/deps.png)
+
+<br />
+
+[dirs](/readme-resources/dirs.png)
