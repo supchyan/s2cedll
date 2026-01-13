@@ -4,52 +4,133 @@
 #include <windef.h>
 #include <winuser.h>
 #include <iostream>
+#include <string>
+#include <fstream>
 
-static COLORREF s2cePrimary = RGB(50, 50, 50);
-static COLORREF s2ceText	= RGB(250, 250, 250);
+static COLORREF s2cePrimary = RGB(30,  30,  30 );
+static COLORREF s2ceText	= RGB(100, 100, 200);
 
-static int(WINAPI* OriginalDrawTextW) (HDC hdc, LPCWSTR lpchText, int cchText, LPRECT lprc, UINT format) = DrawTextW;
-static int(WINAPI* OriginalFillRect) (HDC hdc, const RECT* lprc, HBRUSH hbr) = FillRect;
+static int(WINAPI* oDrawTextW) (HDC hdc, LPCWSTR lpchText, int cchText, LPRECT lprc, UINT format) = DrawTextW;
 
-// unused
-static COLORREF(WINAPI* OriginalSetTextColor) (HDC hdc, COLORREF color) = SetTextColor;
-static COLORREF(WINAPI* OriginalSetBkColor) (HDC hdc, COLORREF color) = SetBkColor;
-static HBRUSH(WINAPI* OriginalGetSysColorBrush) (int nIndex) = GetSysColorBrush;
-static DWORD(WINAPI* OriginalGetSysColor) (int nIndex) = GetSysColor;
-static HBRUSH(WINAPI* OriginalCreateSolidBrush) (COLORREF color) = CreateSolidBrush;
+HBRUSH(WINAPI* oCreateSolidBrush) (COLORREF color) = CreateSolidBrush;
 
-int _DrawTextW(HDC hdc, LPCWSTR lpchText, int cchText, LPRECT lprc, UINT format) {
-	SetBkColor(hdc, s2cePrimary);
+static BOOL(WINAPI* oBitBlt) (
+	HDC   hdc,
+	int   x,
+	int   y,
+	int   cx,
+	int   cy,
+	HDC   hdcSrc,
+	int   x1,
+	int   y1,
+	DWORD rop
+) = BitBlt;
+
+static HBITMAP(WINAPI* oCreateDIBitmap) (
+	HDC                    hdc,
+	const BITMAPINFOHEADER* pbmih,
+	DWORD                  flInit,
+	const VOID* pjBits,
+	const BITMAPINFO* pbmi,
+	UINT                   iUsage
+) = CreateDIBitmap;
+
+/**
+Logs some data into a `.log` file.
+*/
+static void log(std::string data) {
+	std::fstream log(".log", std::ios::app);
+	log << data;
+	log << "\n";
+	log.close();
+}
+/**
+Converts `LPCWSTR` type to a `string` type.
+*/
+static std::string LPCWSTRtoSTR(LPCWSTR lpcwszStr)
+{
+	int strLength = WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, nullptr, 0, nullptr, nullptr);
+	std::string str(strLength, 0);
+	WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, &str[0], strLength, nullptr, nullptr);
+	return str;
+}
+
+/**
+Creates filled bitmap rectangle.
+*/
+HBITMAP CreateFilledBitmap(int width, int height, COLORREF c) {
+	HBITMAP hBitmap = CreateBitmap(width, height, 1, 64, NULL);
+	HDC		hdc		= CreateCompatibleDC(NULL);
+
+	SelectObject(hdc, hBitmap);
+	
+	HBRUSH hBrush	= CreateSolidBrush(c);
+	RECT   rect		= { 0, 0, width, height };
+	
+	FillRect(hdc, &rect, hBrush);
+
+	DeleteObject(hBrush);
+	DeleteDC(hdc);
+
+	return hBitmap;
+}
+
+//BOOL hBitBlt(
+//	HDC   hdc,
+//	int   x,
+//	int   y,
+//	int   cx,
+//	int   cy,
+//	HDC   hdcSrc,
+//	int   x1,
+//	int   y1,
+//	DWORD rop
+//) {
+	//DeleteDC(hdcSrc);
+
+	//HBITMAP hbm = CreateFilledBitmap(cx, cy, RGB(0, 0, 255));
+	//HDC hdcMem = CreateCompatibleDC(hdc);
+
+	//SelectObject(hdcMem, hbm);
+
+	//return oBitBlt(hdc, 20, 20, 20, 20, hdcSrc, 20, 20, rop);
+//}
+//HBITMAP hCreateDIBitmap(
+//	HDC                    hdc,
+//	const BITMAPINFOHEADER* pbmih,
+//	DWORD                  flInit,
+//	const VOID* pjBits,
+//	const BITMAPINFO* pbmi,
+//	UINT                   iUsage
+//) {
+//	BITMAPINFO bmi = BITMAPINFO();
+//
+//	bmi.bmiHeader = pbmi->bmiHeader;
+//	BITMAPINFO* _pbmi = &bmi;
+//
+//	for (int i = 0; i < 256; i++) {
+//		_pbmi->bmiColors[i].rgbRed = (BYTE)i;
+//		_pbmi->bmiColors[i].rgbGreen = (BYTE)i;
+//		_pbmi->bmiColors[i].rgbBlue = (BYTE)i;
+//		_pbmi->bmiColors[i].rgbReserved = (BYTE)0;
+//	}
+//
+//
+//	return oCreateDIBitmap(hdc, pbmih, flInit, NULL, _pbmi, iUsage);
+//}
+
+// This one is cool for non-bitmap depended redrawings
+HBRUSH hCreateSolidBrush(COLORREF color) {
+	if (color == 0x00D0D0D0 || color == 0x00F8F8F8) {
+		color = s2cePrimary;
+	}
+
+	return oCreateSolidBrush(color);
+}
+
+int hDrawTextW(HDC hdc, LPCWSTR lpchText, int cchText, LPRECT lprc, UINT format) {
 	SetTextColor(hdc, s2ceText);
-
-	return OriginalDrawTextW(hdc, lpchText, cchText, lprc, format);
-}
-int _FillRect(HDC hdc, const RECT* lprc, HBRUSH hbr) {
-	SetBkColor(hdc, s2cePrimary);
-	return OriginalFillRect(hdc, lprc, CreateSolidBrush(s2cePrimary));
-}
-DWORD _GetSysColor(int nIndex) {
-	return s2cePrimary; //OriginalGetSysColor(nIndex);
-}
-
-// unused
-COLORREF _SetTextColor(HDC hdc, COLORREF color) {
-	return OriginalSetTextColor(hdc, color);
-}
-COLORREF _SetBkColor(HDC hdc, COLORREF color) {
-	return OriginalSetBkColor(hdc, color);
-}
-HBRUSH _GetSysColorBrush(int nIndex) {
-	return OriginalGetSysColorBrush(nIndex);
-}
-HBRUSH _CreateSolidBrush(COLORREF color) {
-	//if (color == 0x00F8F8F8) {
-	//	return OriginalCreateSolidBrush(0x000000FF);
-	//}
-	//if (color == 0x00FFFFFF) {
-	//	return OriginalCreateSolidBrush(0x000000FF);
-	//}
-	return OriginalCreateSolidBrush(color);
+	return oDrawTextW(hdc, lpchText, cchText, lprc, format);
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
@@ -63,13 +144,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
 
-		DetourAttach(&(PVOID&)OriginalDrawTextW, _DrawTextW);
-		DetourAttach(&(PVOID&)OriginalFillRect, _FillRect);
-		DetourAttach(&(PVOID&)OriginalSetTextColor, _SetTextColor);
-		DetourAttach(&(PVOID&)OriginalSetBkColor, _SetBkColor);
-		DetourAttach(&(PVOID&)OriginalGetSysColorBrush, _GetSysColorBrush);
-		DetourAttach(&(PVOID&)OriginalGetSysColor, _GetSysColor);
-		DetourAttach(&(PVOID&)OriginalCreateSolidBrush, _CreateSolidBrush);
+		
+		DetourAttach(&(PVOID&)oCreateSolidBrush, hCreateSolidBrush);
+		DetourAttach(&(PVOID&)oDrawTextW, hDrawTextW);
 
 		DetourTransactionCommit();
 	}
@@ -77,15 +154,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourTransactionBegin();
 		DetourUpdateThread(GetCurrentThread());
 
-		DetourDetach(&(PVOID&)OriginalDrawTextW, _DrawTextW);
-		DetourDetach(&(PVOID&)OriginalFillRect, _FillRect);
-		DetourDetach(&(PVOID&)OriginalSetTextColor, _SetTextColor);
-		DetourDetach(&(PVOID&)OriginalSetBkColor, _SetBkColor);
-		DetourDetach(&(PVOID&)OriginalGetSysColorBrush, _GetSysColorBrush);
-		DetourDetach(&(PVOID&)OriginalGetSysColor, _GetSysColor);
-		DetourDetach(&(PVOID&)OriginalCreateSolidBrush, _CreateSolidBrush);
+		DetourDetach(&(PVOID&)oCreateSolidBrush, hCreateSolidBrush);
+		DetourDetach(&(PVOID&)oDrawTextW, hDrawTextW);
 
 		DetourTransactionCommit();
 	}
+
 	return TRUE;
 }
