@@ -138,7 +138,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="framework.h" />
+    <ClInclude Include="helper.h" />
+    <ClInclude Include="hooks.h" />
+    <ClInclude Include="log.h" />
+    <ClInclude Include="pointers.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="thememgr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
