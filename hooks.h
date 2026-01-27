@@ -15,6 +15,11 @@ COLORREF header_color	= RGB(0, 0, 0);
 float font_size_offset  = 1;
 std::string font_family	= "Tahoma";
 
+
+HWND current_hwnd{ 0 };
+LPRECT current_lprect{ 0 };
+LPRECT menu_lprect{ 0 }; // try to get a menu item rectangle for this. like.. hook something like CreateRect() for this.
+
 /**
 Initializes theme values, reading `.theme` file.
 */
@@ -70,7 +75,14 @@ int hDrawTextW(HDC hdc, LPCWSTR lpchText, int cchText, LPRECT lprc, UINT format)
 	// update text color before rendering it
 	if (orig_col == 0x00000000) {
 		SetTextColor(hdc, text_color);
-		
+
+		//HDC _hdc = GetDC(current_hwnd);
+		HBRUSH _hbr = CreateSolidBrush(main_color);
+
+		FillRect(hdc, lprc, _hbr);
+
+		DeleteObject(_hbr);
+		//DeleteDC(_hdc);
 	}
 	if (orig_col == 0x00FFFFFF) {
 		SetTextColor(hdc, title_color);
@@ -210,15 +222,8 @@ int hSetWindowRgn(HWND hWnd, HRGN hRgn, BOOL bRedraw) {
 // before the original background hasn't been drawn yet,
 // which will replace the custom one in the end...
 HDC hBeginPaint(HWND hWnd, const LPPAINTSTRUCT lpPaint) {
-	//HDC hdc = GetDC(hWnd);
-
-	//SetBkMode(hdc, OPAQUE);
-
-	//RECT rect = { 0, 0, 999, 999 };
-
-	//FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 0)));
-
-	//ReleaseDC(hWnd, hdc);
+	current_hwnd	= hWnd;
+	current_lprect	= &lpPaint->rcPaint;
 
 	return oBeginPaint(hWnd, lpPaint);
 }
@@ -233,7 +238,7 @@ BOOL hEndPaint(HWND hWnd, const PAINTSTRUCT* lpPaint) {
 
 	//SetBkMode(hdc, OPAQUE);
 
-	//RECT rect = { 0, 0, 999, 999 };
+	//RECT rect = lpPaint->rcPaint;
 
 	//FillRect(hdc, &rect, CreateSolidBrush(RGB(255, 255, 0)));
 
@@ -275,4 +280,26 @@ int hSetDIBitsToDevice(HDC hdc, int xDest, int yDest, DWORD w, DWORD h, int xSrc
 // useless
 BOOL hBitBlt(HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, DWORD rop) {
 	return oBitBlt(hdc, x, y, cx, cy, hdcSrc, x1, y1, rop);
+}
+
+BOOL hExtTextOutW(HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx) {
+	//RECT rect{};
+
+	//rect.left = lprect->left;
+	//rect.top = lprect->top;
+	//rect.right = lprect->right;
+	//rect.bottom = lprect->bottom;
+
+	//HDC _hdc = GetDC(current_hwnd);
+	//HBRUSH _hbr = CreateSolidBrush(accent_color);
+
+	//FillRect(_hdc, &rect, _hbr);
+
+	//DeleteObject(_hbr);
+	//DeleteDC(_hdc);
+
+	return oExtTextOutW(hdc, x, y, options, lprect, lpString, c, lpDx);
+}
+BOOL hGetTextMetricsW(HDC hdc, LPTEXTMETRICW lptm) {
+	return oGetTextMetricsW(hdc, lptm);
 }

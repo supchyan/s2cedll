@@ -38,6 +38,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourAttach(&(PVOID&)oFillRect, hFillRect);
 		DetourAttach(&(PVOID&)oSetDIBitsToDevice, hSetDIBitsToDevice);
 		DetourAttach(&(PVOID&)oBitBlt, hBitBlt);
+		DetourAttach(&(PVOID&)oExtTextOutW, hExtTextOutW);
+		DetourAttach(&(PVOID&)oGetTextMetricsW, hGetTextMetricsW);
 
 		DetourTransactionCommit();
 	}
@@ -63,7 +65,9 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourDetach(&(PVOID&)oFillRect, hFillRect);
 		DetourDetach(&(PVOID&)oSetDIBitsToDevice, hSetDIBitsToDevice);
 		DetourDetach(&(PVOID&)oBitBlt, hBitBlt);
-
+		DetourDetach(&(PVOID&)oExtTextOutW, hExtTextOutW);
+		DetourDetach(&(PVOID&)oGetTextMetricsW, hGetTextMetricsW);
+		
 		DetourTransactionCommit();
 
 		Log::message("[W] Exited with code 0"); // log "exit" message

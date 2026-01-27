@@ -20,3 +20,5 @@ BOOL(WINAPI* oEndPaint) (HWND hWnd, const PAINTSTRUCT* lpPaint) = EndPaint;
 int(WINAPI* oFillRect) (HDC hDC,const RECT* lprc, HBRUSH hbr) = FillRect;
 int(WINAPI* oSetDIBitsToDevice) (HDC hdc, int xDest, int yDest, DWORD w, DWORD h, int xSrc, int ySrc, UINT StartScan, UINT cLines, const VOID* lpvBits, const BITMAPINFO* lpbmi, UINT ColorUse) = SetDIBitsToDevice;
 BOOL(WINAPI* oBitBlt) (HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, DWORD rop) = BitBlt;
+BOOL(WINAPI* oExtTextOutW) (HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx) = ExtTextOutW;
+BOOL(WINAPI* oGetTextMetricsW) (HDC hdc, LPTEXTMETRICW lptm) = GetTextMetricsW;

@@ -7,22 +7,6 @@ This class contains variety of methods to perform different helping things, such
 class Helper {
 public:
 	/**
-	Converts `LPCWSTR` type to a `string` type.
-	*/
-	static std::string lpcwstr_to_str(LPCWSTR lpcwszStr)
-	{
-		int strLength = WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, nullptr, 0, nullptr, nullptr);
-		std::string str(strLength, 0);
-		WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, &str[0], strLength, nullptr, nullptr);
-		return str;
-	}
-	/**
-	Returns `true` whenever `lpStr` includes `seq`.
-	*/
-	static bool lpcwstr_includes(LPCWSTR lpStr, std::string seq) {
-		return lpcwstr_to_str(lpStr).find(seq) != std::string::npos;
-	}
-	/**
 	Returns `true` whenever `str` includes `seq` (For `LPCWSTR` use `lpcwstr_includes()` instead).
 	*/
 	static bool includes(std::string str, std::string seq) {
@@ -41,6 +25,22 @@ public:
 		while (getline(stream, token, delimiter)) {
 			out[index++] = token;
 		}
+	}
+	/**
+	Returns `true` whenever `lpStr` includes `seq`.
+	*/
+	static bool lpcwstr_includes(LPCWSTR lpStr, std::string seq) {
+		return lpcwstr_to_str(lpStr).find(seq) != std::string::npos;
+	}
+	/**
+	Converts `LPCWSTR` type to a `string` type.
+	*/
+	static std::string lpcwstr_to_str(LPCWSTR lpcwszStr)
+	{
+		int strLength = WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, nullptr, 0, nullptr, nullptr);
+		std::string str(strLength, 0);
+		WideCharToMultiByte(CP_UTF8, 0, lpcwszStr, -1, &str[0], strLength, nullptr, nullptr);
+		return str;
 	}
 	/**
 	Converts hex color to a COLORREF. Example: "#ffffff" -> RGB(255,255,255)
