@@ -32,6 +32,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourAttach(&(PVOID&)oInsertMenuItemW, hInsertMenuItemW);
 		DetourAttach(&(PVOID&)oSetBkColor, hSetBkColor);
 		DetourAttach(&(PVOID&)oCreateDIBitmap, hCreateDIBitmap);
+		DetourAttach(&(PVOID&)oCreateBitmap, hCreateBitmap);
 		DetourAttach(&(PVOID&)oSetWindowRgn, hSetWindowRgn);
 		DetourAttach(&(PVOID&)oBeginPaint, hBeginPaint);
 		DetourAttach(&(PVOID&)oEndPaint, hEndPaint);
@@ -40,6 +41,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourAttach(&(PVOID&)oBitBlt, hBitBlt);
 		DetourAttach(&(PVOID&)oExtTextOutW, hExtTextOutW);
 		DetourAttach(&(PVOID&)oGetTextMetricsW, hGetTextMetricsW);
+		DetourAttach(&(PVOID&)oCreateRectRgn, hCreateRectRgn);
 
 		DetourTransactionCommit();
 	}
@@ -59,6 +61,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourDetach(&(PVOID&)oInsertMenuItemW, hInsertMenuItemW);
 		DetourDetach(&(PVOID&)oSetBkColor, hSetBkColor);
 		DetourDetach(&(PVOID&)oCreateDIBitmap, hCreateDIBitmap);
+		DetourDetach(&(PVOID&)oCreateBitmap, hCreateBitmap);
 		DetourDetach(&(PVOID&)oSetWindowRgn, hSetWindowRgn);
 		DetourDetach(&(PVOID&)oBeginPaint, hBeginPaint);
 		DetourDetach(&(PVOID&)oEndPaint, hEndPaint);
@@ -67,6 +70,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)
 		DetourDetach(&(PVOID&)oBitBlt, hBitBlt);
 		DetourDetach(&(PVOID&)oExtTextOutW, hExtTextOutW);
 		DetourDetach(&(PVOID&)oGetTextMetricsW, hGetTextMetricsW);
+		DetourDetach(&(PVOID&)oCreateRectRgn, hCreateRectRgn);
+		
 		
 		DetourTransactionCommit();
 

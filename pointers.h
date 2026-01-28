@@ -8,6 +8,7 @@ HBRUSH(WINAPI* oCreateSolidBrush) (COLORREF color) = CreateSolidBrush;
 HWND(WINAPI* oCreateWindowExW) (DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) = CreateWindowExW;
 BOOL(WINAPI* oSetWindowTextW) (HWND hWnd, LPCWSTR lpString) = SetWindowTextW;
 HBITMAP(WINAPI* oCreateDIBitmap) (HDC hdc, const BITMAPINFOHEADER* pbmih, DWORD flInit, const VOID* pjBits, const BITMAPINFO* pbmi, UINT iUsage) = CreateDIBitmap;
+HBITMAP(WINAPI* oCreateBitmap) (int nWidth,int nHeight,UINT nPlanes,UINT nBitCount,const VOID* lpBits) = CreateBitmap;
 ATOM(WINAPI* oRegisterClassExW) (const WNDCLASSEXW* unnamedParam1) = RegisterClassExW;
 BOOL(WINAPI* oAppendMenuW) (HMENU hMenu, UINT uFlags, UINT_PTR uIDNewItem, LPCWSTR lpNewItem) = AppendMenuW;
 BOOL(WINAPI* oSetMenuInfo) (HMENU unnamedParam1, LPCMENUINFO unnamedParam2) = SetMenuInfo;
@@ -22,3 +23,4 @@ int(WINAPI* oSetDIBitsToDevice) (HDC hdc, int xDest, int yDest, DWORD w, DWORD h
 BOOL(WINAPI* oBitBlt) (HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, DWORD rop) = BitBlt;
 BOOL(WINAPI* oExtTextOutW) (HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx) = ExtTextOutW;
 BOOL(WINAPI* oGetTextMetricsW) (HDC hdc, LPTEXTMETRICW lptm) = GetTextMetricsW;
+HRGN(WINAPI* oCreateRectRgn) (int x1,int y1,int x2,int y2) = CreateRectRgn;

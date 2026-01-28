@@ -101,9 +101,62 @@ public:
 	static COLORREF hbr_to_colorref(HBRUSH hbr) {
 		LOGBRUSH lbr = { 0 };
 
-		if (GetObject(hbr, sizeof(lbr), &lbr))
+		if (GetObjectW(hbr, sizeof(lbr), &lbr))
 		{
 			return lbr.lbColor;
 		}
+	}
+	static void ReplaceColorInBitmap(HBITMAP hBitmap, COLORREF oldColor, COLORREF newColor) {
+		BITMAP bmp;
+		GetObjectW(hBitmap, sizeof(bmp), &bmp);
+
+		// Create a DIB section to access pixel data
+		BITMAPINFOHEADER bmih = { 0 };
+		bmih.biSize = sizeof(BITMAPINFOHEADER);
+		bmih.biWidth = bmp.bmWidth;
+		bmih.biHeight = -bmp.bmHeight;  // Negative for top-down DIB
+		bmih.biPlanes = 1;
+		bmih.biBitCount = 32; // Use 32-bit for RGBA
+		bmih.biCompression = BI_RGB;
+
+		// Allocate memory for pixel data
+		const int pixelCount = bmp.bmWidth * bmp.bmHeight;
+		BYTE* pixels = new BYTE[bmp.bmWidthBytes * bmp.bmHeight];
+
+		// Get the pixel data
+		HDC hdc = GetDC(nullptr);
+		GetDIBits(hdc, hBitmap, 0, bmp.bmHeight, pixels, (BITMAPINFO*)&bmih, DIB_RGB_COLORS);
+		ReleaseDC(nullptr, hdc);
+
+		// Define the target colors for quicker comparison
+		BYTE oldR = GetRValue(oldColor);
+		BYTE oldG = GetGValue(oldColor);
+		BYTE oldB = GetBValue(oldColor);
+
+		BYTE newR = GetRValue(newColor);
+		BYTE newG = GetGValue(newColor);
+		BYTE newB = GetBValue(newColor);
+
+		// Replace oldColor with newColor
+		for (int y = 0; y < bmp.bmHeight; y++) {
+			for (int x = 0; x < bmp.bmWidth; x++) {
+				int index = (y * bmp.bmWidthBytes) + (x * 4);
+				// Perform a direct memory comparison
+				if (pixels[index] == oldB && pixels[index + 1] == oldG && pixels[index + 2] == oldR) {
+					// Set new color (goes BGR)
+					pixels[index] = newB;
+					pixels[index + 1] = newG;
+					pixels[index + 2] = newR;
+				}
+			}
+		}
+
+		// Update the bitmap with the modified pixel data
+		hdc = GetDC(nullptr);
+		SetDIBits(hdc, hBitmap, 0, bmp.bmHeight, pixels, (BITMAPINFO*)&bmih, DIB_RGB_COLORS);
+		ReleaseDC(nullptr, hdc);
+
+		// Cleanup
+		delete[] pixels;
 	}
 };
