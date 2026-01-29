@@ -24,3 +24,5 @@ BOOL(WINAPI* oBitBlt) (HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1
 BOOL(WINAPI* oExtTextOutW) (HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx) = ExtTextOutW;
 BOOL(WINAPI* oGetTextMetricsW) (HDC hdc, LPTEXTMETRICW lptm) = GetTextMetricsW;
 HRGN(WINAPI* oCreateRectRgn) (int x1,int y1,int x2,int y2) = CreateRectRgn;
+void (WINAPI* oExitProcess) (UINT uExitCode) = ExitProcess;
+int (WINAPI* oSetDIBits) (HDC hdc, HBITMAP hbm, UINT start, UINT cLines, const VOID* lpBits, const BITMAPINFO* lpbmi, UINT ColorUse) = SetDIBits;

@@ -36,6 +36,9 @@
     <ClInclude Include="thememgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="bmrect.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">

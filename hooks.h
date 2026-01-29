@@ -1,4 +1,5 @@
 #include "thememgr.h"
+#include "bmrect.h"
 
 /**
 This variable can be used as `get_value()` pointer to store some value as buffer.
@@ -17,10 +18,10 @@ std::string font_family	= "Tahoma";
 
 
 HWND current_hwnd { 0 };
-HDC current_hdc { 0 };
-RECT current_rect { 0 };
-RECT menu_lprect { 0 }; // try to get a menu item rectangle for this. like.. hook something like CreateRect() for this.
-HBITMAP cur_hbitmap{ 0 };
+
+HBITMAP old_bm{ 0 };
+HDC old_bmhdc{ 0 };
+BMRECT old_bmrect{ 0 };
 /**
 Initializes theme values, reading `.theme` file.
 */
@@ -190,12 +191,49 @@ COLORREF hSetBkColor(HDC hdc, COLORREF color) {
 
 // useless, since it's complicated to modify colors of pjBits (too slow).
 HBITMAP hCreateDIBitmap(HDC hdc, const BITMAPINFOHEADER* pbmih, DWORD flInit, const VOID* pjBits, const BITMAPINFO* pbmi, UINT iUsage) {
-	HBITMAP hbm = oCreateDIBitmap(hdc, pbmih, flInit, pjBits, pbmi, iUsage);
-	return hbm;
+	//for (int row = 0; row < pbmih->biHeight; row++) {
+	//	for (int col = 0; col < pbmih->biWidth; col++) {
+	//		int index = (row * pbmih->biWidth + col) * 4;
+
+	//		((BYTE*)pjBits)[index + 0] = GetBValue(main_color); // b
+	//		((BYTE*)pjBits)[index + 1] = GetGValue(main_color); // g
+	//		((BYTE*)pjBits)[index + 2] = GetRValue(main_color); // r
+	//	}
+	//}
+	//iUsage = DIB_RGB_COLORS;
+
+	//BYTE* _pjBits{ 0 };
+
+	//_pjBits = (BYTE*)pjBits;
+
+	//for (int row = 0; row < pbmih->biHeight; row++) {
+	//	for (int col = 0; col < pbmih->biWidth; col++) {
+	//		int index = (row * pbmih->biWidth + col) * 4;
+	//		//Log::message(Helper::colorref_to_hex(RGB(((BYTE*)pjBits)[index + 2], ((BYTE*)pjBits)[index + 1], ((BYTE*)pjBits)[index + 0])));
+	//		_pjBits[index + 0] = GetBValue(main_color); // b
+	//		_pjBits[index + 1] = GetGValue(main_color); // g
+	//		_pjBits[index + 2] = GetRValue(main_color); // r
+	//	}
+	//}
+
+	HBITMAP callback = oCreateDIBitmap(hdc, pbmih, flInit, pjBits, pbmi, iUsage);
+
+	old_bm = callback;
+
+	return callback;
 }
 HBITMAP hCreateBitmap(int nWidth, int nHeight, UINT nPlanes, UINT nBitCount, const VOID* lpBits) {
-	HBITMAP hbm = oCreateBitmap(nWidth, nHeight, nPlanes, nBitCount, lpBits);
-	return hbm;
+	//for (int row = 0; row < nHeight; row++) {
+	//	for (int col = 0; col < nWidth; col++) {
+	//		int index = (row * nWidth + col) * 4;
+	//		//Log::message(Helper::colorref_to_hex(RGB(((BYTE*)lpBits)[index + 2], ((BYTE*)lpBits)[index + 1], ((BYTE*)lpBits)[index + 0])));
+	//		((BYTE*)lpBits)[index + 0] = 0; // b
+	//		((BYTE*)lpBits)[index + 1] = 0; // g
+	//		((BYTE*)lpBits)[index + 2] = 0; // r
+	//	}
+	//}
+	//HBITMAP hbm = oCreateBitmap(nWidth, nHeight, nPlanes, nBitCount, lpBits);
+	return oCreateBitmap(nWidth, nHeight, nPlanes, nBitCount, lpBits);
 }
 
 // useless
@@ -209,8 +247,6 @@ int hSetWindowRgn(HWND hWnd, HRGN hRgn, BOOL bRedraw) {
 // which will replace the custom one in the end...
 HDC hBeginPaint(HWND hWnd, const LPPAINTSTRUCT lpPaint) {
 	current_hwnd = hWnd;
-	current_hdc = lpPaint->hdc;
-	current_rect = lpPaint->rcPaint;
 
 	//HBRUSH _hbr = CreateSolidBrush(main_color);
 	//FillRect(current_hdc, &current_rect, _hbr);
@@ -225,6 +261,18 @@ HDC hBeginPaint(HWND hWnd, const LPPAINTSTRUCT lpPaint) {
 // with a content specified.
 // probably use to fix "menu_items / text" background rendering problem.
 BOOL hEndPaint(HWND hWnd, const PAINTSTRUCT* lpPaint) {
+	//BitBlt(old_bmhdc, old_bmrect.x, old_bmrect.y, old_bmrect.w, .5 * old_bmrect.h, old_bmhdc, old_bmrect.x, old_bmrect.y, PATINVERT);
+	//if (old_bmhdc != (HDC)0) { // check the existance of bitmap data
+
+	//	
+
+	//	//POINT point[3] = { old_bmrect.y, old_bmrect.h, old_bmrect.x };
+	//	//PlgBlt(old_bmhdc, point, old_bmhdc, old_bmrect.x, old_bmrect.y, old_bmrect.w, old_bmrect.h, NULL, 0, 0);
+
+	//	//Log::message(std::to_string((int)old_bmhdc));
+
+	//	old_bmhdc = (HDC)0; // flush data to prevent useless re-drawings
+	//}
 	return oEndPaint(hWnd, lpPaint);
 }
 
@@ -247,70 +295,57 @@ int hFillRect(HDC hDC, const RECT* lprc, HBRUSH hbr) {
 
 	return oFillRect(hDC, lprc, hbr);
 }
-
-// usless, since i don't know, how to work with bitmaps rendering
+// usless, hooks cursor outline
+int hSetDIBits(HDC hdc, HBITMAP hbm, UINT start, UINT cLines, const VOID* lpBits, const BITMAPINFO* lpbmi, UINT ColorUse) {
+	return oSetDIBits(hdc, hbm, start, cLines, lpBits, lpbmi, ColorUse);
+}
+/**
+Hooks all bitmap related element, including icons, color circle (bg + ramp), buttons, text and etc.
+P.S. Some elements may be repainted after call, so it should probably be handled as well.
+*/
 int hSetDIBitsToDevice(HDC hdc, int xDest, int yDest, DWORD w, DWORD h, int xSrc, int ySrc, UINT StartScan, UINT cLines, const VOID* lpvBits, const BITMAPINFO* lpbmi, UINT ColorUse) {
-	
-	// TODO:
-	// COLORS IN BITS RECEIVED, BUT REPLACEMENT IS... JUNKY.
-
-	if (w >= 164 && w == h) { // hook only color circle, since its bitmap is big and has a square shape (i.e. unique)
-		for (int row = 0; row < h; row++) {
-			for (int col = 0; col < w; col++) {
-
-				//for x32 bitmaps:
-				int index = (row * w + col) * 4;
-				
-				// LAST MESSAGE BEFORE BED !!!!!!!!
-				// maybe try to handle other methods where lpvBits exist
-				// я тут про те методы, которые создают картинку, а не применяют ее
-				// какой-нибудь типа createBitmap()
-				// что всасывает биты как раз
-				// проверять в таком методе наличие f8f8f8 битов и менять как тут ниже.
-				// возможно это устранит гличи, которые в этом хуке появляются.
-				// всё-таки этот метод затрагивает тексты и иконы, чего может и не быть в других методах битмапов.
-				// 
-				// список методов для работы с битмапами есть на сайте майкрософта. Bitmap Functions раздел называется.
-				
-				// override color circle with a custom fill
-				((BYTE*)lpvBits)[index + 0] = GetBValue(main_color); // b
-				((BYTE*)lpvBits)[index + 1] = GetGValue(main_color); // g
-				((BYTE*)lpvBits)[index + 2] = GetRValue(main_color); // r
-			}
-		}
-	}
+	// TODO
+	// replace colors of menu items / icons.
+	// icons color may be changed just by inverting their bits color with BitBlt().
+	// Menu items way more complicated since they have text drawn above,
+	// so we cant just "invert" or overpaint the background...
+	// for menus it's better to use ExtTextOutW() function like:
+	//	change bitmap bits before text is painted over it, 
+	//	then call ExtTextOutW() to render a text over changed bits 
+	//	and that's it for the most of items.
 
 	int callback = oSetDIBitsToDevice(hdc, xDest, yDest, w, h, xSrc, ySrc, StartScan, cLines, lpvBits, lpbmi, ColorUse);
+	
+	// replace color circle bg color
+	// this method checks if provided data is color circle belonged, 
+	// so it's ok here
+	ThemeMgr::set_color_circle_col_alt(hdc, w, h, main_color);
 
 	return callback;
 }
 
-// useless
+/** 
+Hooks GDI area after cursor (but BitBlt itself can be useful to emulate theme colors via multiple raster-operation codes (like filters for SVG fill in CSS))
+*/
 BOOL hBitBlt(HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, DWORD rop) {
 	return oBitBlt(hdc, x, y, cx, cy, hdcSrc, x1, y1, rop);
 }
-
+// useless, hooks text drawing logic
 BOOL hExtTextOutW(HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx) {
-	//RECT rect{};
-
-	//rect.left = lprect->left;
-	//rect.top = lprect->top;
-	//rect.right = lprect->right;
-	//rect.bottom = lprect->bottom;
-
-	//HDC _hdc = GetDC(current_hwnd);
-	//HBRUSH _hbr = CreateSolidBrush(accent_color);
-
-	//FillRect(_hdc, &rect, _hbr);
-
-	//DeleteDC(_hdc);
-	//DeleteObject(_hbr);
-
 	return oExtTextOutW(hdc, x, y, options, lprect, lpString, c, lpDx);
 }
+// useless
 BOOL hGetTextMetricsW(HDC hdc, LPTEXTMETRICW lptm) {
 	return oGetTextMetricsW(hdc, lptm);
 }
+// useless
 HRGN hCreateRectRgn(int x1, int y1, int x2, int y2) {
 	return oCreateRectRgn(x1, y1, x2, y2);
+}
+/**
+Hooks process exit
+*/
+void hExitProcess(UINT uExitCode) {
+	Log::message("[W] Exited with code " + std::to_string(uExitCode));
+	return oExitProcess(uExitCode);
 }

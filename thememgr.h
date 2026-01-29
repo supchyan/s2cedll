@@ -48,4 +48,85 @@ public:
 		theme_file.close();
 		return 0; // return 0 (failed)
 	}
+	/**
+	Sets background color for a color circle bitmap.
+	*/
+	static void set_color_circle_col(DWORD width, DWORD height, BYTE* lpvBits, COLORREF col) {// sizes of a color circle bitmap resource:
+		// 166px - 100%; 
+		// 206px - 125%; 
+		// 250px - 150%; 
+		// 326px - 200%.
+		DWORD cc_s[4] = { 166, 206, 250, 326 };
+
+		if (width != height) return; // return if provided rect is not belonged to a color circle
+
+		if (width != cc_s[0] &&
+			width != cc_s[1] &&
+			width != cc_s[2] &&
+			width != cc_s[3]
+			) {
+			return; // return if provided rect is not belonged to a color circle
+		}
+
+		float w = (float)width;
+		float h = (float)height;
+
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				int i = (y * w + x) * 4;// 32bits color index (i.e. 0x00RRGGBB -> 0 -> 4 -> 8 -> ...)
+				float th = 5;			// thickness of color circle outline
+				float ox = x - w / 2;	// x center
+				float oy = y - h / 2;	// y center
+				float r = w / 2 - th;	// radius
+
+				bool c = ox*ox + oy*oy > r*r;
+
+				if (c) {
+					// update color of specified bit
+					lpvBits[i + 0] = GetBValue(col);	// b
+					lpvBits[i + 1] = GetGValue(col);	// g
+					lpvBits[i + 2] = GetRValue(col);	// r
+				}
+			}
+		}
+	}
+	/**
+	Sets background color for a color circle bitmap [ slow, but stable alternative for `set_color_circle_col()` ].
+	*/
+	static void set_color_circle_col_alt(HDC hdc, DWORD width, DWORD height, COLORREF col) {
+		// sizes of a color circle bitmap resource:
+		// 166px - 100%; 
+		// 206px - 125%; 
+		// 250px - 150%; 
+		// 326px - 200%.
+		DWORD cc_s[4] = { 166, 206, 250, 326 };
+
+		if (width != height) return; // return if provided rect is not belonged to a color circle
+
+		if (width != cc_s[0] && 
+			width != cc_s[1] && 
+			width != cc_s[2] && 
+			width != cc_s[3]
+		) {
+			return; // return if provided rect is not belonged to a color circle
+		}
+		
+		float w = (float)width;
+		float h = (float)height;
+
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				float th = 5;			// thickness of color circle outline
+				float ox = x - w / 2;	// x center
+				float oy = y - h / 2;	// y center
+				float r = w / 2 - th;	// radius
+
+				bool c = ox * ox + oy * oy > r * r;
+
+				if (c) {
+					SetPixel(hdc, x, y, col);
+				}
+			}
+		}
+	}
 };
