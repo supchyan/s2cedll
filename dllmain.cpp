@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "log.h"
-#include "pointers.h"
-#include "hooks.h"
+#include ".\src\log.h"
+#include ".\src\pointers.h"
+#include ".\src\hooks.h"
 #include <detours.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  dwReason, LPVOID lpReserved)

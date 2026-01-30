@@ -21,22 +21,19 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="log.h">
+    <ClInclude Include="src\hooks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="helper.h">
+    <ClInclude Include="src\thememgr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pointers.h">
+    <ClInclude Include="src\helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="hooks.h">
+    <ClInclude Include="src\pointers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thememgr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="bmrect.h">
+    <ClInclude Include="src\log.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

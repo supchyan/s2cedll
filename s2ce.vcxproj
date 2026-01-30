@@ -137,14 +137,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="bmrect.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="helper.h" />
-    <ClInclude Include="hooks.h" />
-    <ClInclude Include="log.h" />
-    <ClInclude Include="pointers.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="thememgr.h" />
+    <ClInclude Include="src\helper.h" />
+    <ClInclude Include="src\hooks.h" />
+    <ClInclude Include="src\log.h" />
+    <ClInclude Include="src\pointers.h" />
+    <ClInclude Include="src\thememgr.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />

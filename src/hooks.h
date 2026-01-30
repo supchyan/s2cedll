@@ -1,5 +1,4 @@
 #include "thememgr.h"
-#include "bmrect.h"
 
 /**
 This variable can be used as `get_value()` pointer to store some value as buffer.
@@ -21,7 +20,6 @@ HWND current_hwnd { 0 };
 
 HBITMAP old_bm{ 0 };
 HDC old_bmhdc{ 0 };
-BMRECT old_bmrect{ 0 };
 /**
 Initializes theme values, reading `.theme` file.
 */
@@ -263,12 +261,7 @@ HDC hBeginPaint(HWND hWnd, const LPPAINTSTRUCT lpPaint) {
 BOOL hEndPaint(HWND hWnd, const PAINTSTRUCT* lpPaint) {
 	//BitBlt(old_bmhdc, old_bmrect.x, old_bmrect.y, old_bmrect.w, .5 * old_bmrect.h, old_bmhdc, old_bmrect.x, old_bmrect.y, PATINVERT);
 	//if (old_bmhdc != (HDC)0) { // check the existance of bitmap data
-
-	//	
-
-	//	//POINT point[3] = { old_bmrect.y, old_bmrect.h, old_bmrect.x };
-	//	//PlgBlt(old_bmhdc, point, old_bmhdc, old_bmrect.x, old_bmrect.y, old_bmrect.w, old_bmrect.h, NULL, 0, 0);
-
+	
 	//	//Log::message(std::to_string((int)old_bmhdc));
 
 	//	old_bmhdc = (HDC)0; // flush data to prevent useless re-drawings
@@ -332,6 +325,18 @@ BOOL hBitBlt(HDC hdc, int x, int y, int cx, int cy, HDC hdcSrc, int x1, int y1, 
 }
 // useless, hooks text drawing logic
 BOOL hExtTextOutW(HDC hdc, int x, int y, UINT options, const RECT* lprect, LPCWSTR lpString, UINT c, const INT* lpDx) {
+	HBRUSH hbr = CreateSolidBrush(main_color);
+	//LPRECT rect{};
+	//rect->left = 0;
+	//rect->right = pbmi->bmiHeader.biWidth;
+	//rect->top = 0;
+	//rect->bottom = pbmi->bmiHeader.biHeight;
+
+	FillRect(hdc, lprect, hbr);
+
+	//DeleteObject(rect);
+	DeleteObject(hbr);
+
 	return oExtTextOutW(hdc, x, y, options, lprect, lpString, c, lpDx);
 }
 // useless
